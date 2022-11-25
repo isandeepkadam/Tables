@@ -14,10 +14,10 @@ const TableComponent: React.FunctionComponent<{
   const [order, setOrder] = useState<SortType>('ASC');
   const [sortKey, setSortKey] = useState<SortKeys>('person');
 
-  const sortedData = useCallback(() => {
-    const result = sortData({ dataTable: tableData, sortKey, sortType: order });
-    return result;
-  }, [order, sortKey, order]);
+  const sortedData = useCallback(
+    () => sortData({ dataTable: tableData, sortKey, sortType: order }),
+    [order, sortKey, tableData]
+  );
 
   const changeSort = (key: SortKeys) => {
     setOrder(order === 'ASC' ? 'DSC' : 'ASC');
