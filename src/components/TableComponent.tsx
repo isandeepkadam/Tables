@@ -1,7 +1,7 @@
-import { MouseEventHandler, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { headersType } from '../App';
-import data from '../data.json';
 import './tableComponent.css';
+import data from '../data.json';
 
 type tableDataType = typeof data;
 type SortKeys = 'person' | 'city' | 'email' | 'joiningDate' | 'role';
@@ -14,10 +14,10 @@ const TableComponent: React.FunctionComponent<{
   const [order, setOrder] = useState<SortType>('ASC');
   const [sortKey, setSortKey] = useState<SortKeys>('person');
 
-  const sortedData = useCallback(
-    () => sortData({ dataTable: tableData, sortKey }),
-    [order, sortKey, setOrder]
-  );
+  const sortedData = useCallback(() => {
+    const result = sortData({ dataTable: tableData, sortKey, sortType: order });
+    return result;
+  }, [order, sortKey, order]);
 
   const changeSort = (key: SortKeys) => {
     setOrder(order === 'ASC' ? 'DSC' : 'ASC');
@@ -77,17 +77,8 @@ const TableComponent: React.FunctionComponent<{
                   );
                 }
 
-                //split values if item value is nested
-                if (header.value.includes('.')) {
-                  const itemSplit: string[] = header.value.split('.'); // ['person', 'name']
-                  return (
-                    <td
-                      key={index}
-                    >{`${item}.${itemSplit[0]}.${itemSplit[1]}`}</td>
-                  );
-                }
                 //return header Value
-                return <td key={index}>{item[`${header.value}`]}</td>;
+                return <td key={index}>{item[header.value] as string}</td>;
               })}
             </tr>
           ))}
@@ -100,23 +91,41 @@ const TableComponent: React.FunctionComponent<{
 function sortData({
   dataTable,
   sortKey,
+  sortType,
 }: {
   dataTable: tableDataType;
   sortKey: SortKeys;
+  sortType: SortType;
 }) {
   if (!sortKey) return dataTable;
 
   const sortedData = data.sort((a, b) => {
     if (sortKey === 'joiningDate') {
-      let aa = a.joiningDate.split('/').reverse().join(),
+      const aa = a.joiningDate.split('/').reverse().join(),
         bb = b.joiningDate.split('/').reverse().join();
-      return aa < bb ? -1 : aa > bb ? 1 : 0;
+      const dateA = new Date(aa),
+        dateB = new Date(bb);
+
+      if (sortType === 'ASC') {
+        if (dateA > dateB) return 1;
+        else return -1;
+      } else {
+        if (dateA < dateB) return 1;
+        else return -1;
+      }
     }
 
     if (sortKey === 'person') {
-      return a[sortKey].name > b[sortKey].name ? 1 : -1;
+      const order =
+        sortType === 'ASC'
+          ? a[sortKey].name < b[sortKey].name
+          : a[sortKey].name > b[sortKey].name;
+      return order ? 1 : -1;
     }
-    return a[sortKey] > b[sortKey] ? 1 : -1;
+
+    const order =
+      sortType === 'ASC' ? a[sortKey] < b[sortKey] : a[sortKey] > b[sortKey];
+    return order ? 1 : -1;
   });
 
   return sortedData;

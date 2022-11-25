@@ -20,7 +20,7 @@ function App() {
   const tableOneHeaders: headersType[] = [
     { heading: 'Name', value: 'person', sort: true },
     { heading: 'Email', value: 'email' },
-    { heading: 'Role', value: 'role', sort: true },
+    { heading: 'Role', value: 'role' },
   ];
 
   const tableTwoHeaders: headersType[] = [
